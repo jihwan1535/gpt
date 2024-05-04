@@ -1,13 +1,15 @@
 package com.test.oepnai.domain.smartpush.controller;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.test.oepnai.domain.smartpush.dto.response.ChatGptResponse;
 import com.test.oepnai.domain.smartpush.service.ChatGptService;
-import com.test.oepnai.domain.smartpush.dto.ContentRequest;
+import com.test.oepnai.domain.smartpush.dto.request.PromptRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,11 +24,12 @@ public class ChatGptController {
 		consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
 		path = "/prompt"
 	)
-	public void prompt(@ModelAttribute final ContentRequest request) {
+	public ResponseEntity<String> prompt(@ModelAttribute final PromptRequest request) {
 		if (!request.image().getContentType().startsWith("image")) {
 			throw new IllegalArgumentException("not image");
 		}
-		chatGptService.prompt(request);
+		final ChatGptResponse response = chatGptService.prompt(request);
+		return ResponseEntity.ok(response.choises().get(0).message().content());
 	}
 
 }
