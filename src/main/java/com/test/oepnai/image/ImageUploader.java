@@ -14,6 +14,7 @@ public class ImageUploader {
 
 	public static final String SYSTEM_PATH = System.getProperty("user.dir");
 	public static final String SLASH = File.separator;
+	public static final String IMAGE_DIR = SLASH + "images" + SLASH;
 
 	private final String url;
 	private final String uploadDirPath;
@@ -36,7 +37,7 @@ public class ImageUploader {
 		final File uploadPath = new File(fileSavePath, saveFileName);
 
 		transferFile(image, uploadPath);
-		return url + File.separator + uploadDirPath + File.separator + saveFileName;
+		return url + IMAGE_DIR + saveFileName;
 	}
 
 	private void makeDirectory(final String fileSavePath) {
