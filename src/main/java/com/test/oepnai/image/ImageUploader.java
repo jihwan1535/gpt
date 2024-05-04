@@ -29,7 +29,6 @@ public class ImageUploader {
 	}
 
 	public String upload(final MultipartFile image) {
-
 		final String fileSavePath = SYSTEM_PATH + SLASH + uploadDirPath;
 		makeDirectory(fileSavePath);
 

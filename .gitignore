@@ -36,5 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 
-/src/main/resources/static/
+/src/main/resources/static/images/
 gradle.properties
+/static/
