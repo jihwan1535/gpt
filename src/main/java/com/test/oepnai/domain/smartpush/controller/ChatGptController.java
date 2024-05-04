@@ -29,7 +29,7 @@ public class ChatGptController {
 			throw new IllegalArgumentException("not image");
 		}
 		final ChatGptResponse response = chatGptService.prompt(request);
-		return ResponseEntity.ok(response.choises().get(0).message().content());
+		return ResponseEntity.ok(response.choices().get(0).message().content());
 	}
 
 }

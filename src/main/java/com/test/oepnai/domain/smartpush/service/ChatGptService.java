@@ -38,7 +38,7 @@ public class ChatGptService {
 	private ChatGptRequest parseMessage(final PromptRequest prompt) {
 		final String imageUrl = imageUploader.upload(prompt.image());
 		final String text = prompt.text();
-		System.out.println(imageUrl);
+
 		return ChatGptRequest.toDto(model, text, imageUrl);
 	}
 
