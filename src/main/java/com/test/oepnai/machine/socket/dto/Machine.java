@@ -2,10 +2,10 @@ package com.test.oepnai.machine.socket.dto;
 
 import java.util.Objects;
 
-public record Machine(String machineId) {
+public record Machine(String machineName) {
     @Override
     public int hashCode() {
-        return machineId.hashCode();
+        return machineName.hashCode();
     }
 
     @Override
@@ -14,6 +14,6 @@ public record Machine(String machineId) {
             return false;
         }
         Machine machine = (Machine) obj;
-        return this.machineId.equals(machine.machineId);
+        return this.machineName.equals(machine.machineName);
     }
 }

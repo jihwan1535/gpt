@@ -47,11 +47,12 @@ public class MachineManager {
     }
 
     /**
-     * @param customMachineName 기기에서 지정한 이름
      * @param webSocketSession  세션이 만들어지며 자동으로 생성
      */
-    void addMachine(final String customMachineName, final WebSocketSession webSocketSession) {
-        final Machine machine = new Machine(customMachineName);
+    void addMachine(final WebSocketSession webSocketSession) {
+        // 세션을 통해 텍스트 데이터를 주고받아 machineName 을 정하는 로직
+
+        final Machine machine = new Machine(null);
         if (sessions.containsKey(machine)) {
             throw new IllegalArgumentException("이미 존재하는 기계 아이디 입니다");
         }
