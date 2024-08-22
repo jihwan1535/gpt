@@ -4,5 +4,7 @@ rabbitmq:
   username: admin
   password: admin123!@#
   exchange: raspberry.exchange
-  queue: raspberry.queue
-  routing-key: raspberry.key
+  raspberry-queue: raspberry.queue
+  raspberry-key: raspberry.key
+  image-queue: image.queue
+  image-key: image.key
