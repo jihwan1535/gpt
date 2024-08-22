@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.delivery'
+version = '0.0.1-SNAPSHOT'
+
+configurations {
+    complieOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.rabbitmq:amqp-client:5.18.0'
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+
+    runtimeOnly 'org.slf4j:slf4j-simple:1.7.36'
+
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
