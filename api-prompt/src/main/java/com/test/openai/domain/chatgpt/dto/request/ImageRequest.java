@@ -1,4 +1,4 @@
-package com.test.openai.domain.smartpush.dto.request;
+package com.test.openai.domain.chatgpt.dto.request;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

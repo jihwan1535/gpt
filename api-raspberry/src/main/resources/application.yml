@@ -1,0 +1,8 @@
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: admin
+  password: admin123!@#
+  exchange: raspberry.exchange
+  queue: raspberry.queue
+  routing-key: raspberry.key

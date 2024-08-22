@@ -1,4 +1,4 @@
-package com.test.openai.domain.smartpush.controller;
+package com.test.openai.domain.chatgpt.controller;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.test.openai.domain.smartpush.dto.response.ChatGptResponse;
-import com.test.openai.domain.smartpush.service.ChatGptService;
-import com.test.openai.domain.smartpush.dto.request.PromptRequest;
+import com.test.openai.domain.chatgpt.dto.response.ChatGptResponse;
+import com.test.openai.domain.chatgpt.service.ChatGptService;
+import com.test.openai.domain.chatgpt.dto.request.PromptRequest;
 
 import lombok.RequiredArgsConstructor;
 

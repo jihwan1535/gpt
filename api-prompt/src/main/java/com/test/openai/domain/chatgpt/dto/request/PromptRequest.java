@@ -1,4 +1,4 @@
-package com.test.openai.domain.smartpush.dto.request;
+package com.test.openai.domain.chatgpt.dto.request;
 
 import org.springframework.web.multipart.MultipartFile;
 

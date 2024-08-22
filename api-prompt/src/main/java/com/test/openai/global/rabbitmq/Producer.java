@@ -1,4 +1,4 @@
-package com.test.openai.global.config.rabbitmq;
+package com.test.openai.global.rabbitmq;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
