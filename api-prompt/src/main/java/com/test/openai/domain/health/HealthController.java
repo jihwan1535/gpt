@@ -32,7 +32,8 @@ public class HealthController {
             path = "/image"
     )
     public String healthCheckImageUpload(@ModelAttribute final MultipartFile image) {
-        return s3ImageUploader.upload(image);
+       // return s3ImageUploader.upload(image);
+        return null;
     }
 
 }

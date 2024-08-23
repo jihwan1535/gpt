@@ -19,12 +19,14 @@ public class Consumer {
 
     @RabbitListener(queues = "image.queue")
     public void imageCaptureConsumer(byte[] image) {
-        log.info("image capture consumer called");
-        // yoloService.detect(image);
-        /*
-        redis 저장
 
-        imageUploader.upload();
-         */
+        log.info("image capture consumer called");
+        byte[] detectedImage = yoloService.detect(image);
+        log.info("detected image {}", detectedImage);
+
+        final String contentType = "image/png";
+        final String imageUrl = imageUploader.upload(detectedImage, contentType);
+        log.info("image url {}", imageUrl);
+        // redis 저장
     }
 }
