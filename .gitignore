@@ -39,3 +39,4 @@ out/
 /src/main/resources/static/images/
 gradle.properties
 /static/
+api-prompt/src/main/resources/application-private.yml

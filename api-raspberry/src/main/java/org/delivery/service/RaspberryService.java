@@ -56,7 +56,7 @@ public class RaspberryService {
         try {
             channel.queueDeclare(config.getImageQueue(), true, false, false, null);
             channel.queueBind(config.getImageQueue(), config.getExchangeName(), config.getImageKey());
-            byte[] imageData = captureImage();
+            final byte[] imageData = captureImage();
             channel.basicPublish(config.getExchangeName(), config.getImageKey(), null, imageData);
             log.info("이미지 publish");
         } catch (IOException e) {
