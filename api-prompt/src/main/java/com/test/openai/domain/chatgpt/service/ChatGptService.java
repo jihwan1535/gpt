@@ -1,6 +1,7 @@
 package com.test.openai.domain.chatgpt.service;
 
 import com.test.openai.domain.chatgpt.producer.Producer;
+import com.test.openai.global.config.openai.OpenAiRestTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,7 @@ import com.test.openai.image.ImageUploader;
 public class ChatGptService {
 
 	private final ImageUploader imageUploader;
-	private final RestTemplate restTemplate;
-	private final Producer producer;
+	private final OpenAiRestTemplate restTemplate;
 	@Value("${openai.model}") private String model;
 	@Value("${openai.api.url}") private String apiURL;
 

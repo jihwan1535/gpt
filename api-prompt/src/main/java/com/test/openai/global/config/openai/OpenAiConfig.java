@@ -1,4 +1,4 @@
-package com.test.openai.global.config;
+package com.test.openai.global.config.openai;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,8 +15,8 @@ public class OpenAiConfig {
 	}
 
 	@Bean
-	public RestTemplate template() {
-		final RestTemplate restTemplate = new RestTemplate();
+	public OpenAiRestTemplate template() {
+		final OpenAiRestTemplate restTemplate = new OpenAiRestTemplate();
 		restTemplate.getInterceptors().add((request, body, execution) -> {
 			request.getHeaders().add("Authorization", "Bearer " + apiKey);
 			return execution.execute(request, body);
