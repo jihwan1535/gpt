@@ -1,6 +1,6 @@
 package com.test.openai.domain.chatgpt.service;
 
-import com.test.openai.global.rabbitmq.Producer;
+import com.test.openai.domain.chatgpt.producer.Producer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

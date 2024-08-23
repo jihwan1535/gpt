@@ -1,6 +1,6 @@
 package com.test.openai.domain.chatgpt.controller;
 
-import com.test.openai.global.rabbitmq.Producer;
+import com.test.openai.domain.chatgpt.producer.Producer;
 import jakarta.annotation.PostConstruct;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,16 +20,8 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api")
 public class ChatGptController {
 
-	private static final String RASPBERRY_EXCHANGE = "raspberry.exchange";
-	private static final String RASPBERRY_KEY = "raspberry.key";
-
 	private final ChatGptService chatGptService;
 	private final Producer producer;
-
-	@PostConstruct
-	public void init() {
-		producer.producer(RASPBERRY_EXCHANGE, RASPBERRY_KEY, "capture");
-	}
 
 	@PostMapping(
 		consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},

@@ -1,6 +1,6 @@
 package com.test.openai.domain.health;
 
-import com.test.openai.global.rabbitmq.Producer;
+import com.test.openai.domain.chatgpt.producer.Producer;
 import com.test.openai.image.S3ImageUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,16 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/health")
 public class HealthController {
 
-    private static final String RASPBERRY_EXCHANGE = "raspberry.exchange";
-    private static final String RASPBERRY_KEY = "raspberry.key";
-
     private final Producer producer;
     private final S3ImageUploader s3ImageUploader;
 
     @GetMapping
     public void healthCheck() {
         log.info("Health Check");
-        producer.producer(RASPBERRY_EXCHANGE, RASPBERRY_KEY, "capture");
+        producer.producer();
     }
 
     @PostMapping(
