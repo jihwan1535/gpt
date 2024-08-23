@@ -1,4 +1,4 @@
-package com.test.openai.domain.yolo.consumer.service;
+package com.test.openai.domain.yolo.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

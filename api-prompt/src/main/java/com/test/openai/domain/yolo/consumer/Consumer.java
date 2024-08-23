@@ -1,13 +1,11 @@
 package com.test.openai.domain.yolo.consumer;
 
-import com.test.openai.domain.yolo.consumer.service.YoloService;
-import com.test.openai.image.ImageUploader;
+import com.test.openai.domain.yolo.service.YoloService;
 import com.test.openai.image.S3ImageUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,5 +26,6 @@ public class Consumer {
         final String imageUrl = imageUploader.upload(detectedImage, contentType);
         log.info("image url {}", imageUrl);
         // redis 저장
+        S3ImageUploader.latestUrl = imageUrl;
     }
 }

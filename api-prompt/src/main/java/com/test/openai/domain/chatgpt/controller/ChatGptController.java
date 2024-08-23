@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,14 +24,8 @@ public class ChatGptController {
 	private final ChatGptService chatGptService;
 	private final Producer producer;
 
-	@PostMapping(
-		consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE},
-		path = "/prompt"
-	)
-	public ResponseEntity<String> prompt(@ModelAttribute final PromptRequest request) {
-		if (!request.image().getContentType().startsWith("image")) {
-			throw new IllegalArgumentException("not image");
-		}
+	@PostMapping(path = "/prompt")
+	public ResponseEntity<String> prompt(@RequestBody final PromptRequest request) {
 		final ChatGptResponse response = chatGptService.prompt(request);
 		return ResponseEntity.ok(response.choices().get(0).message().content());
 	}

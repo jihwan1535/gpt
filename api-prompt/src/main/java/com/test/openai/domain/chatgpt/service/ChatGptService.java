@@ -2,6 +2,7 @@ package com.test.openai.domain.chatgpt.service;
 
 import com.test.openai.domain.chatgpt.producer.Producer;
 import com.test.openai.global.config.openai.OpenAiRestTemplate;
+import com.test.openai.image.S3ImageUploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ import com.test.openai.image.ImageUploader;
 @RequiredArgsConstructor
 public class ChatGptService {
 
-	private final ImageUploader imageUploader;
+	private final S3ImageUploader imageUploader;
 	private final OpenAiRestTemplate restTemplate;
 	@Value("${openai.model}") private String model;
 	@Value("${openai.api.url}") private String apiURL;
@@ -27,7 +28,7 @@ public class ChatGptService {
 	}
 
 	private ChatGptRequest parseMessage(final PromptRequest prompt) {
-		final String imageUrl = imageUploader.upload(prompt.image());
+		final String imageUrl = S3ImageUploader.latestUrl;
 		final String text = prompt.text();
 
 		return ChatGptRequest.toDto(model, text, imageUrl);

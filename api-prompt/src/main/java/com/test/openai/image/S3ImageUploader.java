@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 @Component
 public class S3ImageUploader {
 
+    public static String latestUrl;
     private final S3Client amazonS3;
 
     @Value("${spring.cloud.aws.s3.bucket}")
