@@ -21,3 +21,12 @@ image:
 lmm:
   openapi:
     url: http://localohst:8080
+
+
+machine:
+  url: http://localhost:18962
+  coordinate:
+    x:
+      max: 100
+    y:
+      max: 100
