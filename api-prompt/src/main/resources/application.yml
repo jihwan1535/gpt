@@ -1,0 +1,23 @@
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin123!@#
+  profiles:
+    include: private
+
+openai:
+  model: ${OPEN_AI_MODEL}
+  api:
+    key: ${OPEN_AI_KEY}
+    url: ${OPEN_AI_URL}
+
+image:
+  upload:
+    url: ${IMAGE_UPLOAD_URL}
+    directory: ${IMAGE_UPLOAD_DIRECTORY}
+
+lmm:
+  openapi:
+    url: http://localohst:8080
