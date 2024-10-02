@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
  * 현재, X, Y 최소값을 0으로 가정하고 개발완료.
  * 또한 Z 를 이용한 푸싱 머신 개발 미완. -> 장비 구매 후 도입 예정
  */
-@Component
+//@Component
 class MachineInfo {
     private final int sizeX;
     private final int sizeY;

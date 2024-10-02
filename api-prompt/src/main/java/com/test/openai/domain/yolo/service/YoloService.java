@@ -1,5 +1,6 @@
 package com.test.openai.domain.yolo.service;
 
+import com.test.openai.domain.yolo.dto.DetectedObjectResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -20,17 +21,17 @@ public class YoloService {
     @Value("${flask.server.url}")
     private String flaskServerUrl;
 
-    public byte[] detect(final byte[] image) {
+    public DetectedObjectResponse detect(final byte[] image) {
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_PNG);
 
         final HttpEntity<byte[]> requestEntity = new HttpEntity<>(image, headers);
 
-        final ResponseEntity<byte[]> response = restTemplate.exchange(
-                flaskServerUrl + "/detect_changes",
+        final ResponseEntity<DetectedObjectResponse> response = restTemplate.exchange(
+                flaskServerUrl + "/detect",
                 HttpMethod.POST,
                 requestEntity,
-                byte[].class
+                DetectedObjectResponse.class
         );
 
         if (response.getStatusCode() == HttpStatus.OK) {

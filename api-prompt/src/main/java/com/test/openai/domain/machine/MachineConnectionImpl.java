@@ -8,7 +8,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
-@Service
+//@Service
 class MachineConnectionImpl implements MachineConnection {
 
     private final String targetURL;

@@ -6,7 +6,7 @@ public record ChatGptRequest(String model, List<MessageRequest> messages, int ma
 
 	public static ChatGptRequest toDto(final String model, final String text, final String imageUrl) {
 		final MessageRequest messageRequest = MessageRequest.of(text, imageUrl);
-		return new ChatGptRequest(model, List.of(messageRequest), 50, 0.1);
+		return new ChatGptRequest(model, List.of(messageRequest), 200, 0.1);
 	}
 
 }

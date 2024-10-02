@@ -2,7 +2,7 @@ package com.test.openai.domain.machine;
 
 import org.springframework.stereotype.Service;
 
-@Service
+//@Service
 public class MachineCodeGeneratorImpl implements MachineCodeGenerator {
 
     @Override

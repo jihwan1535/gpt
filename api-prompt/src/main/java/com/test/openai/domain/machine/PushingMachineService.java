@@ -3,7 +3,7 @@ package com.test.openai.domain.machine;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service
+//@Service
 @RequiredArgsConstructor
 public class PushingMachineService {
     private final MachineCodeConverter machineCodeConverter;
