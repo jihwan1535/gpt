@@ -1,67 +1,86 @@
-from flask import Flask, request, send_file
+import base64
+import os
+import ssl
+
 import cv2
 import numpy as np
-from io import BytesIO
-import os
+import torch
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-
-def detect_changes(image1, image2):
-    # 이미지 크기가 다를 경우 리사이즈
-    if image1.shape != image2.shape:
-        image2 = cv2.resize(image2, (image1.shape[1], image1.shape[0]))
-    # 그레이스케일로 변환
-    gray1 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
-    gray2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
-    # 두 이미지의 차이 계산
-    diff = cv2.absdiff(gray1, gray2)
-    # 임계값 적용
-    _, threshold = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)
-    # 노이즈 제거
-    kernel = np.ones((5, 5), np.uint8)
-    threshold = cv2.morphologyEx(threshold, cv2.MORPH_OPEN, kernel)
-    # 윤곽선 찾기
-    contours, _ = cv2.findContours(threshold, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # 변화가 감지된 부분 표시 및 라벨링
-    result = image1.copy()
-    for i, contour in enumerate(contours, 1):
-        if cv2.contourArea(contour) > 100:  # 작은 변화는 무시
-            x, y, w, h = cv2.boundingRect(contour)
-            cv2.rectangle(result, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            # 라벨 추가 (숫자)
-            cv2.putText(result, str(i), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
-    return result
+ssl._create_default_https_context = ssl._create_unverified_context
 
 
-@app.route('/detect_changes', methods=['POST'])
-def detect_changes_api():
-    # 기존 이미지 (static 폴더에 저장된 이미지)
-    baseImage_path = os.path.join(app.static_folder, 'baseImage.png')
-    baseImage = cv2.imread(baseImage_path)
+def load_model():
+    base_yolo_model = os.path.join(app.static_folder, 'best.pt')
+    return torch.hub.load('ultralytics/yolov5', 'custom', path=base_yolo_model)
 
-    if baseImage is None:
-        return "Base image not found", 404
 
-    # 클라이언트로부터 받은 이미지
-    if 'image/png' not in request.content_type:
-        return "Invalid content type. Expected image/png", 400
+model = load_model()
 
-    image_bytes = request.data
+
+def decode_image(image_bytes):
     nparr = np.frombuffer(image_bytes, np.uint8)
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    return cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-    if image is None:
-        return "Invalid image data", 400
 
-    # 변화 감지
-    result = detect_changes(image, baseImage)
+def detect_objects(img):
+    results = model(img)
+    return results.xyxy[0].cpu().numpy()
 
-    # 결과 이미지를 바이트 스트림으로 변환
-    _, buffer = cv2.imencode('.png', result)
-    io_buf = BytesIO(buffer)
 
-    return send_file(io_buf, mimetype='image/png')
+def process_detections(detections, img):
+    center = []
+    height, width = img.shape[:2]  # 이미지의 높이와 너비 가져오기
+
+    for detection in detections:
+        x1, y1, x2, y2, conf, cls = detection
+        label = f"{model.names[int(cls)]}"
+
+        # 중심 좌표를 백분율로 계산
+        center_x = ((x1 + x2) / 2) / width
+        center_y = ((y1 + y2) / 2) / height
+
+        center.append({
+            "label": label,
+            "x": round(center_x, 2),  # 소수점 둘째 자리까지 반올림
+            "y": round(center_y, 2)  # 소수점 둘째 자리까지 반올림
+        })
+
+        # 바운딩 박스와 라벨 그리기 (픽셀 좌표 사용)
+        cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+        cv2.putText(img, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 6)
+
+    return center, img
+
+def encode_image_to_base64(img):
+    _, img_encoded = cv2.imencode('.jpg', img)
+    return base64.b64encode(img_encoded).decode('utf-8')
+
+
+@app.route('/detect', methods=['POST'])
+def detect_changes_api():
+    if 'image/png' not in request.content_type:
+        return jsonify({"error": "Invalid content type. Expected image/png"}), 400
+
+    try:
+        img = decode_image(request.data)
+        detections = detect_objects(img)
+        center, processed_img = process_detections(detections, img)
+
+        image_base64 = encode_image_to_base64(processed_img)
+
+        response_data = {
+            "result": center,
+            "image": image_base64
+        }
+
+        return jsonify(response_data)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, port=5000)
