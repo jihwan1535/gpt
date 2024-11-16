@@ -1,66 +1,77 @@
 package org.delivery.service;
 
-import com.rabbitmq.client.*;
-import org.delivery.config.RabbitMQConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeoutException;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.sse.EventSource;
+import okhttp3.sse.EventSourceListener;
+import okhttp3.sse.EventSources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RaspberryService {
 
     private static final Logger log = LoggerFactory.getLogger(RaspberryService.class);
-    private final RabbitMQConfig config;
     private static final String TEST_IMAGE_URL = "https://pknu-gpt-service.s3.ap-northeast-2.amazonaws.com/IMG_0625+%E1%84%87%E1%85%A9%E1%86%A8%E1%84%89%E1%85%A1%E1%84%87%E1%85%A9%E1%86%AB.JPG";
 
-    public RaspberryService(final RabbitMQConfig config) {
-        this.config = config;
+    private final OkHttpClient client;
+    private final ObjectMapper objectMapper;
+    private EventSource eventSource;
+
+    public RaspberryService() {
+        this.client = new OkHttpClient.Builder()
+                .retryOnConnectionFailure(true)
+                .build();
+        this.objectMapper = new ObjectMapper();
     }
 
-    public void consume() {
-        final ConnectionFactory factory = config.createConnectionFactory();
+    public void connect() {
+        Request request = new Request.Builder()
+                .url("http://localhost:8082/api/sse/connect/machine1")
+                .header("Accept", "text/event-stream")
+                .build();
 
-        try (final Connection connection = factory.newConnection();
-             final Channel channel = connection.createChannel()
-        ) {
-            channel.exchangeDeclare(config.getExchangeName(), BuiltinExchangeType.DIRECT, true);
-            channel.queueDeclare(config.getRaspBerryQueue(), true, false, false, null);
-            channel.queueBind(config.getRaspBerryQueue(), config.getExchangeName(), config.getRaspberryKey());
+        EventSourceListener listener = new EventSourceListener() {
+            @Override
+            public void onOpen(EventSource eventSource, Response response) {
+                log.info("SSE Connection Successful");
+            }
 
-            observe(channel);
-        } catch (IOException | TimeoutException | InterruptedException e) {
-            log.error("Error => ", e);
-        }
-    }
+            @Override
+            public void onEvent(EventSource eventSource, String id, String type, String data) {
+                try {
+                    String message = objectMapper.readValue(data, String.class);
+                    log.info("Received message {}", message);
 
-    private void observe(Channel channel) throws IOException, InterruptedException {
-        log.info("rabbit MQ on");
-        final DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            final String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-            log.info("message => {}", message);
-            if ("capture".equals(message)) {
-                publishImage(channel);
+                    if (message.equals("capture")) {
+                        log.info("capture event");
+                        // 여기에 capture 관련 로직 추가
+                    }
+                } catch (Exception e) {
+                    log.error("Error parsing event {}", e);
+                }
+            }
+
+            @Override
+            public void onClosed(EventSource eventSource) {
+                log.info("SSE connection closed");
+            }
+
+            @Override
+            public void onFailure(EventSource eventSource, Throwable t, Response response) {
+                log.info("SSE connection failed {}", t.getMessage());
             }
         };
 
-        channel.basicConsume(config.getRaspBerryQueue(), true, deliverCallback, consumerTag -> {});
-        while (true) {
-            Thread.sleep(1000);
-        }
+        eventSource = EventSources.createFactory(client).newEventSource(request, listener);
     }
 
-    private void publishImage(Channel channel) {
-        try {
-            channel.queueDeclare(config.getImageQueue(), true, false, false, null);
-            channel.queueBind(config.getImageQueue(), config.getExchangeName(), config.getImageKey());
-            final byte[] imageData = captureImage();
-            channel.basicPublish(config.getExchangeName(), config.getImageKey(), null, imageData);
-            log.info("이미지 publish");
-        } catch (IOException e) {
-            log.error("error => ", e);
+    public void disconnect() {
+        if (eventSource != null) {
+            eventSource.cancel();
         }
     }
 

@@ -1,14 +1,21 @@
 package org.delivery;
 
-import org.delivery.config.RabbitMQConfig;
-import org.delivery.controller.RaspberryController;
+import org.delivery.service.RaspberryService;
 
 public class Main {
 
     public static void main(String[] args) {
-        RabbitMQConfig rabbitMQConfig = new RabbitMQConfig();
-        RaspberryController raspberryController = new RaspberryController(rabbitMQConfig);
-        raspberryController.start();
+        RaspberryService client = new RaspberryService();
+        client.connect();
+
+        Runtime.getRuntime()
+                .addShutdownHook(new Thread(client::disconnect));
+
+        try {
+            Thread.currentThread().join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }

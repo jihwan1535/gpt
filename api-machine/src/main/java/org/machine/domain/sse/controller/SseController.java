@@ -41,7 +41,7 @@ public class SseController {
     @GetMapping("/push/{target}/capture")
     public void pushEvent(@PathVariable String target) {
         UserSseConnection connection = sseConnectionPool.getConnection(target);
-        log.info(connection.toString());
+        log.info("connection target: {}", connection.toString());
         Optional.ofNullable(connection)
                 .ifPresent(it -> it.sendMessage("capture"));
     }
