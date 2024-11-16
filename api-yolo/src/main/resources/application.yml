@@ -1,9 +1,7 @@
+server:
+  port: 8083
+
 spring:
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: admin
-    password: admin123!@#
   cloud:
     aws:
       region:

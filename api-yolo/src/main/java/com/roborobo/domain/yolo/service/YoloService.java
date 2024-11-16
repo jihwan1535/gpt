@@ -1,10 +1,10 @@
-package org.machine.domain.yolo.service;
+package com.roborobo.domain.yolo.service;
 
+import com.roborobo.domain.yolo.dto.DetectedObjectResponse;
+import com.roborobo.domain.yolo.dto.YoloResponse;
+import com.roborobo.image.S3ImageUploader;
 import java.util.Objects;
-import org.machine.domain.yolo.dto.DetectedObjectResponse;
 import lombok.RequiredArgsConstructor;
-import org.machine.domain.yolo.dto.YoloResponse;
-import org.machine.image.S3ImageUploader;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

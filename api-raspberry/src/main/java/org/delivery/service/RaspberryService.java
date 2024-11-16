@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -23,19 +24,45 @@ public class RaspberryService {
 
     private static final Logger log = LoggerFactory.getLogger(RaspberryService.class);
     private static final String TEST_IMAGE_URL = "https://pknu-gpt-service.s3.ap-northeast-2.amazonaws.com/IMG_0625+%E1%84%87%E1%85%A9%E1%86%A8%E1%84%89%E1%85%A1%E1%84%87%E1%85%A9%E1%86%AB.JPG";
+    private static final int RECONNECT_DELAY = 5000;
+    private static final int TIMEOUT_MINUTES = 1;
 
     private final OkHttpClient client;
     private final ObjectMapper objectMapper;
     private EventSource eventSource;
+    private boolean shouldReconnect = true;
 
     public RaspberryService() {
         this.client = new OkHttpClient.Builder()
                 .retryOnConnectionFailure(true)
+                .readTimeout(0, TimeUnit.MILLISECONDS)
+                .connectTimeout(TIMEOUT_MINUTES, TimeUnit.MINUTES)
                 .build();
         this.objectMapper = new ObjectMapper();
     }
 
     public void connect() {
+        connectWithRetry();
+    }
+
+    private void connectWithRetry() {
+        while (shouldReconnect) {
+            try {
+                connectSSE();
+                break;
+            } catch (Exception e) {
+                log.error("SSE connection failed, retrying in {} seconds...", RECONNECT_DELAY/1000);
+                try {
+                    Thread.sleep(RECONNECT_DELAY);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+    }
+
+    public void connectSSE() {
         Request request = new Request.Builder()
                 .url("http://localhost:8082/api/sse/connect/machine1")
                 .header("Accept", "text/event-stream")
@@ -67,15 +94,24 @@ public class RaspberryService {
             @Override
             public void onClosed(EventSource eventSource) {
                 log.info("SSE connection closed");
+                retryConnection();
             }
 
             @Override
             public void onFailure(EventSource eventSource, Throwable t, Response response) {
                 log.info("SSE connection failed {}", t.getMessage());
+                retryConnection();
             }
         };
 
         eventSource = EventSources.createFactory(client).newEventSource(request, listener);
+    }
+
+    private void retryConnection() {
+        if (shouldReconnect) {
+            log.info("Attempting to reconnect...");
+            new Thread(this::connectWithRetry).start();
+        }
     }
 
     private void HandleCaptureEvent(String commander) {
@@ -92,7 +128,7 @@ public class RaspberryService {
         );
 
         Request request = new Request.Builder()
-                .url("http://localhost:8082/api/yolo/detect")
+                .url("http://localhost:8083/api/yolo/detect")
                 .post(requestBody)
                 .header("Content-Type", "image/png")  // Content-Type 헤더 추가
                 .build();

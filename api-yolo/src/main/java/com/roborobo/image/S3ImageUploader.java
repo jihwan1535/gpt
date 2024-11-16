@@ -1,4 +1,4 @@
-package org.machine.image;
+package com.roborobo.image;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

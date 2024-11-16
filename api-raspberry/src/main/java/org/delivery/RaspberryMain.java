@@ -2,7 +2,7 @@ package org.delivery;
 
 import org.delivery.service.RaspberryService;
 
-public class Main {
+public class RaspberryMain {
 
     public static void main(String[] args) {
         RaspberryService client = new RaspberryService();

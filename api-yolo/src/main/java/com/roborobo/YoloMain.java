@@ -1,13 +1,13 @@
-package org.machine;
+package com.roborobo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Main {
+public class YoloMain {
 
     public static void main(String[] args) {
-        SpringApplication.run(Main.class, args);
+        SpringApplication.run(YoloMain.class, args);
     }
 
 }

@@ -1,4 +1,4 @@
-package org.machine.domain.yolo.dto;
+package com.roborobo.domain.yolo.dto;
 
 import java.util.List;
 

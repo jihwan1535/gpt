@@ -1,6 +1,5 @@
-package org.machine.domain.yolo.dto;
+package com.roborobo.domain.yolo.dto;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,9 +9,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @ToString
-public class DetectedObjectResponse {
+public class DetectedInfoResponse {
 
-    private byte[] image;
-    private List<DetectedInfoResponse> result;
+    private String label;
+    private float x;
+    private float y;
 
 }

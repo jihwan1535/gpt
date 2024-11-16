@@ -1,4 +1,4 @@
-package org.machine.config;
+package com.roborobo.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

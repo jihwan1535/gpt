@@ -3,4 +3,5 @@ include 'api'
 include 'api-prompt'
 include 'api-raspberry'
 include 'api-machine'
+include 'api-yolo'
 

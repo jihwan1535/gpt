@@ -1,8 +1,8 @@
-package org.machine.domain.yolo.controller;
+package com.roborobo.domain.yolo.controller;
 
+import com.roborobo.domain.yolo.dto.YoloResponse;
+import com.roborobo.domain.yolo.service.YoloService;
 import lombok.RequiredArgsConstructor;
-import org.machine.domain.yolo.dto.YoloResponse;
-import org.machine.domain.yolo.service.YoloService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
