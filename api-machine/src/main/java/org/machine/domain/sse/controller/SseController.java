@@ -1,6 +1,7 @@
 package org.machine.domain.sse.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +10,12 @@ import org.machine.domain.sse.model.UserSseConnection;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
 @RestController
@@ -38,20 +42,19 @@ public class SseController {
         return connection.getSseEmitter();
     }
 
-    @GetMapping("/push/{target}/capture")
-    public void pushEvent(@PathVariable String target) {
+    @GetMapping("/push/control/{target}")
+    public void pushEvent(@PathVariable String target, @RequestParam String command, @RequestParam String commander) {
         UserSseConnection connection = sseConnectionPool.getConnection(target);
-        log.info("connection target: {}", connection.toString());
+        log.info("control target - {}, command - {}, commander - {}", target, command, commander);
         Optional.ofNullable(connection)
-                .ifPresent(it -> it.sendMessage("capture"));
+                .ifPresent(it -> it.sendMessage(command, commander));
     }
 
-    @GetMapping("/push/{target}/control")
-    public void pushEvent(@PathVariable String target, @RequestParam String command) {
+    @PostMapping("/push/user/{target}")
+    public void pushImage(@PathVariable String target, @RequestBody SseRequest request) {
         UserSseConnection connection = sseConnectionPool.getConnection(target);
         Optional.ofNullable(connection)
-                .ifPresent(it -> it.sendMessage(command));
-
+                .ifPresent(it -> it.sendMessage(request));
     }
 
 }

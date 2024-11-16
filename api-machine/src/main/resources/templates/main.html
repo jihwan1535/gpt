@@ -49,6 +49,7 @@
             border-radius: 15px;
             max-width: 70%;
             margin-top: 5px;
+            white-space: pre-wrap;
         }
 
         .user .message-content {
@@ -147,13 +148,28 @@
             },
             // SSE 메시지 처리
             handleSseMessage(data) {
-                if (data === 'capture') {
+                try {
+                    // 감지된 객체들의 정보를 문자열로 변환
+                    const detectedInfo = data.detectedObjects
+                        .map(obj => `- ${obj.label} (위치: x=${obj.x.toFixed(2)}, y=${obj.y.toFixed(2)})`)
+                        .join('\n');
+
+                    // 메시지 구성
+                    const message = `이미지 URL: ${data.imageUrl}\n\n감지된 객체:\n${detectedInfo}`;
+
                     this.messages.push({
-                        text: "capture 성공",
+                        text: message,
                         sender: 'assistant',
                         timestamp: new Date().toLocaleTimeString()
                     });
                     this.scrollToBottom();
+                } catch (error) {
+                    console.error('Error parsing YOLO response:', error);
+                    this.messages.push({
+                        text: "Error processing detection result",
+                        sender: 'assistant',
+                        timestamp: new Date().toLocaleTimeString()
+                    });
                 }
             },
             // SSE 연결 설정
