@@ -1,16 +1,14 @@
-package com.test.openai.domain.yolo.consumer;
+package org.machine.domain.yolo.consumer;
 
-import com.test.openai.domain.yolo.dto.DetectedInfoResponse;
-import com.test.openai.domain.yolo.dto.DetectedObjectResponse;
-import com.test.openai.domain.yolo.service.YoloService;
-import com.test.openai.image.S3ImageUploader;
-import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.machine.domain.yolo.dto.DetectedInfoResponse;
+import org.machine.domain.yolo.dto.DetectedObjectResponse;
+import org.machine.domain.yolo.service.YoloService;
+import org.machine.image.S3ImageUploader;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -20,7 +18,6 @@ public class Consumer {
     private final S3ImageUploader imageUploader;
     private final YoloService yoloService;
 
-    @RabbitListener(queues = "image.queue")
     public void imageCaptureConsumer(byte[] image) {
 
         log.info("image capture consumer called");

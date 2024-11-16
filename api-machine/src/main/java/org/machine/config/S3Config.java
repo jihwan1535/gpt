@@ -1,4 +1,4 @@
-package com.test.openai.global.config;
+package org.machine.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

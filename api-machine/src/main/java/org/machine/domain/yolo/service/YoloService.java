@@ -1,6 +1,6 @@
-package com.test.openai.domain.yolo.service;
+package org.machine.domain.yolo.service;
 
-import com.test.openai.domain.yolo.dto.DetectedObjectResponse;
+import org.machine.domain.yolo.dto.DetectedObjectResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

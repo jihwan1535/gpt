@@ -1,4 +1,4 @@
-package com.test.openai.image;
+package org.machine.image;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.test.openai.domain.yolo.dto;
+package org.machine.domain.yolo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

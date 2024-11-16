@@ -1,0 +1,20 @@
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin123!@#
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+      credentials:
+        access-key: AKIA2FXADS5NXQPLTK5C
+        secret-key: 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
+      s3:
+        region: ap-northeast-2
+        bucket: roborobo
+
+flask:
+  server:
+    url: http://localhost:5000

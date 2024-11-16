@@ -1,12 +1,10 @@
 package com.test.openai.domain.chatgpt.service;
 
-import com.test.openai.domain.chatgpt.producer.Producer;
 import com.test.openai.global.config.openai.OpenAiRestTemplate;
 import com.test.openai.image.S3ImageUploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.test.openai.domain.chatgpt.dto.request.ChatGptRequest;
 import com.test.openai.domain.chatgpt.dto.request.PromptRequest;
