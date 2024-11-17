@@ -116,66 +116,134 @@
                    placeholder="Type a message..."></textarea>
         </div>
     </div>
-</div>
-<script>
+</div><script>
     new Vue({
         el: "#app",
         data: {
             messages: [],
             newMessage: '',
-            eventSource: null  // SSE 연결을 위한 변수 추가
+            eventSource: null,
+            lastDetectedInfo: null
         },
         methods: {
-            sendMessage(e) {
+            // 기존 채팅 전송 메서드
+            async sendMessage(e) {
                 const message = this.newMessage.trim();
                 if (!message) return;
 
                 this.newMessage = '';
+                await this.pushUserMessage(message);
 
+                // 이미지 정보가 있을 경우 GPT API 호출
+                if (this.lastDetectedInfo) {
+                    await this.callGptApi(message, this.lastDetectedInfo);
+                }
+            },
+
+            // 사용자 메시지 추가
+            async pushUserMessage(message) {
                 this.messages.push({
                     text: message,
                     sender: 'user',
                     timestamp: new Date().toLocaleTimeString()
                 });
-
                 this.scrollToBottom();
             },
+
+            // 이미지 검출 정보 처리 및 표시
+            async handleDetectionInfo(data) {
+                console.log(data);
+                const detectedInfo = data.detectedObjects
+                    .map(obj => `- ${obj.label} (위치: x=${obj.x}, y=${obj.y})`)
+                    .join('\n');
+
+                const message = `이미지 URL: ${data.imageUrl}\n\n감지된 객체:\n${detectedInfo}`;
+
+                this.messages.push({
+                    text: message,
+                    sender: 'assistant',
+                    timestamp: new Date().toLocaleTimeString()
+                });
+
+                // 검출 정보 저장
+                this.lastDetectedInfo = data;
+                this.scrollToBottom();
+            },
+
+            // GPT API 호출
+            async callGptApi(userMessage, detectionInfo) {
+                const promptRequest = {
+                    text: userMessage,
+                    imageUrl: detectionInfo.imageUrl,
+                    height: 600,
+                    width: 500,
+                    objects: detectionInfo.detectedObjects.map(obj => ({
+                        label: obj.label,
+                        x: obj.x,
+                        y: obj.y
+                    }))
+                };
+                console.log(promptRequest)
+
+                try {
+                    const response = await fetch('http://localhost:8080/api/prompt', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(promptRequest)
+                    });
+
+                    const gptResponse = await response.text();
+                    // [Object명, G-Code] 형식의 응답을 파싱
+                    const cleanText = gptResponse.replace('[', '').replace(']', '');
+                    const [objectName, gCode] = cleanText.split(',');
+
+                    // G-Code가 "Invalid"인 경우
+                    if (gCode === "INVALID") {
+                        this.pushAssistantMessage(`${objectName}는 존재하지 않는 상품입니다.`);
+                    } else {
+                        this.pushAssistantMessage(`${objectName} 뽑기를 시작하겠습니다.`);
+                        console.log(`${objectName}-gCode: ${gCode}`);
+                        // gCode로 기계 동작 Push
+                    }
+                } catch (error) {
+                    console.error('Error calling GPT API:', error);
+                    this.pushAssistantMessage("Error processing GPT response");
+                }
+            },
+
+            // 어시스턴트 메시지 추가
+            pushAssistantMessage(message) {
+                this.messages.push({
+                    text: message,
+                    sender: 'assistant',
+                    timestamp: new Date().toLocaleTimeString()
+                });
+                this.scrollToBottom();
+            },
+
             scrollToBottom() {
                 this.$nextTick(() => {
                     const chatMessages = this.$refs.chatMessages;
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 });
             },
+
             // SSE 메시지 처리
-            handleSseMessage(data) {
+            async handleSseMessage(data) {
                 try {
-                    // 감지된 객체들의 정보를 문자열로 변환
-                    const detectedInfo = data.detectedObjects
-                        .map(obj => `- ${obj.label} (위치: x=${obj.x.toFixed(2)}, y=${obj.y.toFixed(2)})`)
-                        .join('\n');
-
-                    // 메시지 구성
-                    const message = `이미지 URL: ${data.imageUrl}\n\n감지된 객체:\n${detectedInfo}`;
-
-                    this.messages.push({
-                        text: message,
-                        sender: 'assistant',
-                        timestamp: new Date().toLocaleTimeString()
-                    });
-                    this.scrollToBottom();
+                    await this.handleDetectionInfo(data);
                 } catch (error) {
                     console.error('Error parsing YOLO response:', error);
-                    this.messages.push({
-                        text: "Error processing detection result",
-                        sender: 'assistant',
-                        timestamp: new Date().toLocaleTimeString()
-                    });
+                    this.pushAssistantMessage("Error processing detection result");
                 }
             },
+
             // SSE 연결 설정
             setupSSE() {
-                const url = "http://localhost:8082/api/sse/connect/user1";    // 접속주소
-                const eventSource = new EventSource(url);               // sse 연결
+                const url = "http://localhost:8082/api/sse/connect/user1";
+                const eventSource = new EventSource(url);
 
                 eventSource.onopen = event => {
                     console.log("sse connection")
@@ -186,7 +254,9 @@
                     const data = JSON.parse(event.data);
                     this.handleSseMessage(data);
                 }
-            },
+
+                this.eventSource = eventSource;
+            }
         },
         mounted() {
             // 초기 메시지
