@@ -1,0 +1,22 @@
+spring:
+  profiles:
+    active: private
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+machine:
+  url: http://localhost:18962
+  coordinate:
+    x:
+      max: 100
+    y:
+      max: 100
+
+lmm:
+  openapi:
+    url: http://localohst:8082
+
+server:
+  port: 8082

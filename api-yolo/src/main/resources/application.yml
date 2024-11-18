@@ -1,0 +1,18 @@
+server:
+  port: 8083
+
+spring:
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+      credentials:
+        access-key: ${ACCESS}
+        secret-key: ${SECRET}
+      s3:
+        region: ap-northeast-2
+        bucket: roborobo
+
+flask:
+  server:
+    url: http://localhost:5000

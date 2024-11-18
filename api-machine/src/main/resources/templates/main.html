@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .scan-button {
+            background-color: #007AFF;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .scan-button:hover {
+            background-color: #0056b3;
+        }
+
+        .scan-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message.user {
+            align-items: flex-end;
+        }
+
+        .message.assistant {
+            align-items: flex-start;
+        }
+
+        .message-content {
+            padding: 12px 16px;
+            border-radius: 15px;
+            max-width: 70%;
+            margin-top: 5px;
+            white-space: pre-wrap;
+        }
+
+        .user .message-content {
+            background-color: #007AFF;
+            color: white;
+        }
+
+        .assistant .message-content {
+            background-color: #E9ECEF;
+            color: black;
+        }
+
+        .sender-name {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-input textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            resize: none;
+            font-size: 14px;
+            line-height: 1.4;
+            height: 40px;
+            box-sizing: border-box;
+        }
+
+        .chat-input textarea:focus {
+            outline: none;
+            border-color: #007AFF;
+        }
+
+        .timestamp {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Robo Robo Chat</h2>
+            <button
+                    class="scan-button"
+                    @click="scanImage"
+                    :disabled="isMachineOperating">
+                Image Scan
+            </button>
+        </div>
+        <div class="chat-messages" ref="chatMessages">
+            <div v-for="(message, index) in messages"
+                 :key="index"
+                 :class="['message', message.sender === 'user' ? 'user' : 'assistant']">
+                <div class="sender-name">{{ message.sender === 'user' ? 'You' : 'Assistant' }}</div>
+                <div class="message-content">{{ message.text }}</div>
+                <div class="timestamp">{{ message.timestamp }}</div>
+            </div>
+        </div>
+        <div class="chat-input">
+           <textarea
+                   v-model.trim="newMessage"
+                   @keypress.enter.prevent="sendMessage"
+                   placeholder="Type a message..."></textarea>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            messages: [],
+            newMessage: '',
+            eventSource: null,
+            lastDetectedInfo: null,
+            isDetectionReady: false,
+            isMachineOperating: false,
+            currentGCode: null,
+            config: {
+                machineId: 'machine1',
+                userId: "user1",
+                apiUrls: {
+                    gpt: 'http://localhost:8080/api/prompt',
+                    sse: 'http://localhost:8082/api/sse',
+                    control: 'http://localhost:8082/api/sse/push/control'
+                }
+            }
+        },
+        methods: {
+            // 메시지 전송 처리
+            async sendMessage(e) {
+                const message = this.newMessage.trim();
+                if (!message) return;
+
+                // 기계 동작 중이거나 검출 준비가 안 된 경우 처리
+                if (this.isMachineOperating) {
+                    this.pushAssistantMessage("기계가 동작 중입니다. 완료될 때까지 기다려주세요.");
+                    return;
+                }
+                if (!this.isDetectionReady) {
+                    this.pushAssistantMessage("현재 이미지 Scan이 수행되지 않았습니다. 이미지 Scan을 하셨다면, 객체 검출이 완료될 때까지 기다려주세요.");
+                    return;
+                }
+
+                this.newMessage = '';
+                await this.pushUserMessage(message);
+                await this.processGptRequest(message);
+            },
+
+            async pushUserMessage(message) {
+                await this.addMessage(message, 'user');
+            },
+
+            async pushAssistantMessage(message) {
+                await this.addMessage(message, 'assistant');
+            },
+
+            async addMessage(text, sender) {
+                this.messages.push({
+                    text,
+                    sender,
+                    timestamp: new Date().toLocaleTimeString()
+                });
+                this.scrollToBottom();
+            },
+
+            // Object Detection Handlers
+            async handleDetectionInfo(data) {
+                const detectedInfo = this.formatDetectionInfo(data);
+                const message = this.createDetectionMessage(data.imageUrl, detectedInfo);
+
+                await this.pushAssistantMessage(message);
+                this.lastDetectedInfo = data;
+                this.isDetectionReady = true;
+            },
+
+            formatDetectionInfo(data) {
+                return data.detectedObjects
+                    .map(obj => `- ${obj.label} (위치: x=${obj.x}, y=${obj.y})`)
+                    .join('\n');
+            },
+
+            createDetectionMessage(imageUrl, detectedInfo) {
+                return `이미지 URL: ${imageUrl}\n\n감지된 객체:\n${detectedInfo}\n\n획득하고 싶은 상품에 대해 작성해주세요 :)`;
+            },
+
+            // GPT API Handlers
+            async processGptRequest(userMessage) {
+                const promptRequest = this.createPromptRequest(userMessage);
+                try {
+                    const gptResponse = await this.callGptApi(promptRequest);
+                    //const gptResponse = userMessage === "test" ?"[test,INVALID]" : "[Test,G1X10Y100]";
+                    await this.handleGptResponse(gptResponse);
+                } catch (error) {
+                    console.error('Error in GPT process:', error);
+                    await this.pushAssistantMessage("Error processing request");
+                }
+            },
+
+            createPromptRequest(userMessage) {
+                return {
+                    text: userMessage,
+                    imageUrl: this.lastDetectedInfo.imageUrl,
+                    height: 600,
+                    width: 500,
+                    objects: this.lastDetectedInfo.detectedObjects.map(obj => ({
+                        label: obj.label,
+                        x: obj.x,
+                        y: obj.y
+                    }))
+                };
+            },
+
+            async callGptApi(promptRequest) {
+                const response = await fetch(this.config.apiUrls.gpt, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(promptRequest)
+                });
+                return response.text();
+            },
+
+            async handleGptResponse(response) {
+                const [objectName, gCode] = this.parseGptResponse(response);
+
+                if (gCode === "INVALID") {
+                    await this.pushAssistantMessage(`${objectName}는 존재하지 않는 상품입니다.`);
+                } else {
+                    await this.pushAssistantMessage(`${objectName} 뽑기를 시작하겠습니다.`);
+                    await this.sendMachineControl(gCode);
+                }
+            },
+
+            parseGptResponse(response) {
+                const cleanText = response.replace('[', '').replace(']', '');
+                return cleanText.split(',');
+            },
+
+            // 기계 제어 메서드
+            async sendMachineControl(command) {
+                try {
+                    const url = this.createControlUrl(command);
+                    const response = await fetch(url, { method: 'GET' });
+
+                    if (!response.ok) {
+                        throw new Error('Machine control request failed');
+                    }
+
+                    this.currentGCode = command;
+                    console.log('Machine control command sent:', command);
+                } catch (error) {
+                    console.error('Machine control error:', error);
+                    await this.pushAssistantMessage("기계 제어 명령 전송에 실패했습니다.");
+                }
+            },
+
+            createControlUrl(gCode) {
+                const params = new URLSearchParams({
+                    command: gCode,
+                    commander: this.config.userId
+                });
+                return `${this.config.apiUrls.control}/${this.config.machineId}?${params}`;
+            },
+
+            // SSE Handlers
+            setupSSE() {
+                const url = `${this.config.apiUrls.sse}/connect/${this.config.userId}`;
+                const eventSource = new EventSource(url);
+                console.log("event 발생 : ", eventSource);
+                eventSource.addEventListener('onopen', this.handleSseOpen);
+                eventSource.addEventListener('capture', this.handleCapture);
+                eventSource.addEventListener('running', this.handleMachineRunning);
+                eventSource.addEventListener('complete', this.handleMachineComplete);
+
+                this.eventSource = eventSource;
+            },
+
+            handleSseOpen(event) {
+                console.log("SSE Connection Established");
+            },
+
+            // 객체 감지 결과 처리
+            handleCapture(event) {
+                console.log("[CAPTURE] - ", event);
+                try {
+                    const data = JSON.parse(event.data);
+                    this.handleDetectionInfo(data);
+                } catch (error) {
+                    console.error('SSE Message Error:', error);
+                }
+            },
+
+            // 기계 동작 시작
+            handleMachineRunning(event) {
+                console.log("[RUNNING] - ", event);
+                const message = event.data;
+                this.pushAssistantMessage(message);
+                this.isDetectionReady = false;
+                this.isMachineOperating = true;
+            },
+
+            // 기계 동작 완료
+            async handleMachineComplete(event) {
+                console.log("[COMPLETE] - ", event);
+                const message = event.data;
+                await this.pushAssistantMessage(message);
+                this.isMachineOperating = false;
+                await this.pushAssistantMessage("안녕하세요 🫡 Robo Robo입니다.\n상품 선택 전 Image Scan을 해주세요.");
+            },
+
+            // Utility Methods
+            scrollToBottom() {
+                this.$nextTick(() => {
+                    const chatMessages = this.$refs.chatMessages;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
+            },
+
+            async scanImage() {
+                if (this.isMachineOperating) {
+                    return;
+                }
+
+                await this.pushAssistantMessage("이미지 스캔을 시작합니다...");
+                await this.sendMachineControl("capture");
+            },
+        },
+
+        // Lifecycle Hooks
+        mounted() {
+            this.pushAssistantMessage("안녕하세요 🫡 Robo Robo입니다.\n상품 선택 전 Image Scan을 해주세요.");
+            this.setupSSE();
+        },
+
+        beforeDestroy() {
+            if (this.eventSource) {
+                this.eventSource.close();
+            }
+        }
+    });
+</script>
+</body>
+</html>
