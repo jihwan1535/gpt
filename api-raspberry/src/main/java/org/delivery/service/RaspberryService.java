@@ -23,9 +23,9 @@ public class RaspberryService {
     private static final String TEST_IMAGE_URL = "https://roborobo.s3.ap-northeast-2.amazonaws.com/test.jpeg";
     private static final int RECONNECT_DELAY = 5000;
     private static final int TIMEOUT_MINUTES = 1;
-    private static final String SSE_URL = "http://localhost:8082/api/sse/connect/machine1";
-    private static final String YOLO_URL = "http://localhost:8083/api/yolo/detect";
-    private static final String SSE_USER = "http://localhost:8082/api/sse/push/user/";
+    private static final String SSE_URL = "https://996c-222-96-17-66.ngrok-free.app/api/sse/connect/machine1";
+    private static final String YOLO_URL = "https://996c-222-96-17-66.ngrok-free.app/api/yolo/detect";
+    private static final String SSE_USER = "https://996c-222-96-17-66.ngrok-free.app/api/sse/push/user/";
 
     private final OkHttpClient client;
     private final ObjectMapper objectMapper;
