@@ -50,11 +50,25 @@ public class SseController {
                 .ifPresent(it -> it.sendMessage(command, commander));
     }
 
-    @PostMapping("/push/user/{target}")
+    @PostMapping("/push/user/{target}/capture")
     public void pushImage(@PathVariable String target, @RequestBody SseRequest request) {
         UserSseConnection connection = sseConnectionPool.getConnection(target);
         Optional.ofNullable(connection)
-                .ifPresent(it -> it.sendMessage(request));
+                .ifPresent(it -> it.sendMessage("capture", request));
+    }
+
+    @GetMapping("/push/user/{target}/running")
+    public void pushMachineRunning(@PathVariable String target) {
+        UserSseConnection connection = sseConnectionPool.getConnection(target);
+        Optional.ofNullable(connection)
+                .ifPresent(it -> it.sendMessage("running", "사용자 명령에 따라 기계가 동작 중 입니다..."));
+    }
+
+    @GetMapping("/push/user/{target}/complete")
+    public void pushMachineComplete(@PathVariable String target) {
+        UserSseConnection connection = sseConnectionPool.getConnection(target);
+        Optional.ofNullable(connection)
+                .ifPresent(it -> it.sendMessage("complete", "사용자 명령에 따라 기계 동작이 완료 되었습니다."));
     }
 
 }

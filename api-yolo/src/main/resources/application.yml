@@ -7,8 +7,8 @@ spring:
       region:
         static: ap-northeast-2
       credentials:
-        access-key: AKIA2FXADS5NXQPLTK5C
-        secret-key: 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
+        access-key: ${ACCESS}
+        secret-key: ${SECRET}
       s3:
         region: ap-northeast-2
         bucket: roborobo
