@@ -19,6 +19,15 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.36'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:okhttp-sse:4.12.0'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
+
+    implementation 'com.pi4j:pi4j-core:2.0'
+
+    // Pi4J Raspberry Pi Plugin (필수)
+    implementation 'com.pi4j:pi4j-plugin-raspberrypi:2.0'
+
+    // PiGPIO 플러그인 (선택적, 필요 시)
+    implementation 'com.pi4j:pi4j-plugin-pigpio:2.0'
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
 

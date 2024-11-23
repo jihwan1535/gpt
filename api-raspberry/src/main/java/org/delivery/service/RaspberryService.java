@@ -2,10 +2,6 @@ package org.delivery.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import okhttp3.MediaType;
@@ -15,6 +11,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
+import org.delivery.service.machine.MachinePushRequest;
+import org.delivery.service.machine.camera.CameraController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -228,14 +226,8 @@ public class RaspberryService {
 
     // 이미지 캡처 관련 메서드
     private byte[] captureImage() {
-        try {
-            URL url = new URI(TEST_IMAGE_URL).toURL();
-            try (InputStream in = url.openStream()) {
-                return in.readAllBytes();
-            }
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException("Failed to capture image", e);
-        }
+        final CameraController cameraController = new CameraController();
+        return cameraController.getPic();
     }
 
     // 종료 처리
