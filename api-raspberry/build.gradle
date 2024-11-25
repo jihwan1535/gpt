@@ -1,9 +1,19 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+shadowJar {
+    archiveClassifier.set('')
 }
 
 group = 'org.delivery'
 version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17 // JDK 17 사용 (필요에 따라 수정)
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 configurations {
     complieOnly {
@@ -13,6 +23,14 @@ configurations {
 
 repositories {
     mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'org.delivery.RaspberryMain' // 실행할 메인 클래스
+        )
+    }
 }
 
 dependencies {

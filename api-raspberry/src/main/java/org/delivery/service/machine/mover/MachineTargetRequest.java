@@ -11,7 +11,7 @@ public class MachineTargetRequest {
     public MachineTargetRequest(final String request) {
         final String coordinateRequest = request.trim();
         validateForm(coordinateRequest);
-        final String[] coordinates = request.split(",");
+        final String[] coordinates = request.replace("[", "").replace("]","").split(",");
         xRate = parse(coordinates[0]);
         yRate = parse(coordinates[1]);
     }
