@@ -20,6 +20,9 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:okhttp-sse:4.12.0'
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
 
     implementation 'com.pi4j:pi4j-core:2.0'
 

@@ -11,8 +11,12 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSources;
-import org.delivery.service.machine.MachinePushRequest;
+import org.delivery.service.machine.MachineController;
+import org.delivery.service.machine.MachineInstructionRunner;
+import org.delivery.service.machine.MachineInstructionScheduler;
 import org.delivery.service.machine.camera.CameraController;
+import org.delivery.service.machine.mover.MachineInstruction;
+import org.delivery.service.machine.mover.MachineTargetRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +34,10 @@ public class RaspberryService {
     private EventSource eventSource;
     private boolean shouldReconnect = true;
     private boolean isOperating = false;  // 기계 동작 상태
+
+    private final MachineController machineController = new MachineController();
+    private final MachineInstructionScheduler instructionScheduler = machineController.initScheduler();
+    private final MachineInstructionRunner machineInstructionRunner = machineController.initRunner();
 
     public RaspberryService() {
         this.client = createHttpClient();
@@ -134,6 +142,9 @@ public class RaspberryService {
         // G-Code 실행 로직
         log.info("Executing command: {}", command);
         // ... 실제 기계 제어 로직 ...
+        final MachineTargetRequest machineTargetRequest = new MachineTargetRequest(command);
+        final List<MachineInstruction> machineInstructions = instructionScheduler.getMoveAndPushAndReturnToZeroInstructions(machineTargetRequest);
+        machineInstructionRunner.doInstructions(machineInstructions);
     }
 
 

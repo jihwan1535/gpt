@@ -1,4 +1,4 @@
-package com.test.openai.domain.machine;
+package org.delivery.service.machine.mover.coordinate;
 
 import lombok.Getter;
 
@@ -6,7 +6,7 @@ import lombok.Getter;
  * 비율을 입력으로 받는 클래스
  */
 @Getter
-class CoordinateRate {
+public class CoordinateRate {
     private final float coordinate;
 
     private CoordinateRate(float coordinate) {
@@ -19,8 +19,14 @@ class CoordinateRate {
         }
     }
 
-    static CoordinateRate of(final float coordinate) {
+    public static CoordinateRate of(final float coordinate) {
         validate(coordinate);
         return new CoordinateRate(coordinate);
+    }
+
+    public static CoordinateRate of(final String coordinate) {
+        final float parsedCoordinate = Float.parseFloat(coordinate);
+        validate(parsedCoordinate);
+        return new CoordinateRate(parsedCoordinate);
     }
 }

@@ -1,18 +1,18 @@
-package com.test.openai.domain.machine;
+package org.delivery.service.machine.mover.coordinate;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.delivery.service.machine.mover.coordinate.gcode.GcodeDirection;
+import org.delivery.service.machine.mover.coordinate.gcode.MachineCoordinate;
 
 /**
  * 현재, X, Y 최소값을 0으로 가정하고 개발완료.
  * 또한 Z 를 이용한 푸싱 머신 개발 미완. -> 장비 구매 후 도입 예정
  */
 //@Component
-class MachineInfo {
+public class MachineInfo {
     private final int sizeX;
     private final int sizeY;
 
-    public MachineInfo(@Value("${machine.coordinate.x.max}") int sizeX,@Value("${machine.coordinate.y.max}") int sizeY) {
+    public MachineInfo(int sizeX, int sizeY) {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
     }
