@@ -1,6 +1,7 @@
-package com.test.openai.domain.machine;
+package org.delivery.service.machine.mover.coordinate.gcode;
 
-enum Gcode {
+public enum Gcode {
+    G00("G00"),
     G01("G01"),
     G02("G02");
 

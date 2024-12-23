@@ -1,9 +1,19 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+shadowJar {
+    archiveClassifier.set('')
 }
 
 group = 'org.delivery'
 version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17 // JDK 17 사용 (필요에 따라 수정)
+    targetCompatibility = JavaVersion.VERSION_17
+}
 
 configurations {
     complieOnly {
@@ -15,11 +25,23 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'org.delivery.RaspberryMain' // 실행할 메인 클래스
+                //'Main-Class': 'org.delivery.service.machine.linear.LinearActuatorController' // 실행할 메인 클래스
+        )
+    }
+}
+
 dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.36'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:okhttp-sse:4.12.0'
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
 
     implementation 'com.pi4j:pi4j-core:2.0'
 
